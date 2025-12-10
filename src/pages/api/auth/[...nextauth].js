@@ -101,6 +101,6 @@ export default NextAuth({
       },
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'development-secret-key-change-in-production'),
   theme: "dark",
 });

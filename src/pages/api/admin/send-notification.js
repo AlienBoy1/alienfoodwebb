@@ -92,6 +92,7 @@ export default async function handler(req, res) {
     });
     
     console.log("📦 Payload de notificación creado:", notificationPayload);
+    console.log("📤 Enviando notificaciones push a", subscriptions.length, "suscripciones");
 
     // Si no hay suscripciones encontradas para el usuario objetivo,
     // guardamos la notificación en pendingNotifications para entregarla

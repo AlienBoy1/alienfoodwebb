@@ -10,6 +10,7 @@ import {
   UserCircleIcon,
   XIcon,
   CogIcon,
+  BellIcon,
 } from "@heroicons/react/outline";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
@@ -86,6 +87,14 @@ function SideBarMenu({ closeSideBar }) {
                 className="link inline-flex"
               >
                 <UserCircleIcon className="w-5 mr-6" /> Perfil
+              </span>
+            </div>
+            <div>
+              <span
+                onClick={() => sideBarClickHandler("/notifications")}
+                className="link inline-flex"
+              >
+                <BellIcon className="w-5 mr-6" /> Notificaciones
               </span>
             </div>
             <div>

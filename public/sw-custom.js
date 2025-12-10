@@ -95,6 +95,15 @@ self.addEventListener('fetch', function(event) {
 // CRÍTICO: Registrar el listener de push INMEDIATAMENTE al cargar el script
 // Esto debe hacerse ANTES de cualquier otra cosa para asegurar que esté listo
 console.log("📋 Service Worker personalizado cargado - Registrando listener de push...");
+console.log("Service Worker scope:", self.registration?.scope || "N/A");
+console.log("Service Worker state:", self.registration?.active?.state || "N/A");
+
+// Verificar que el Service Worker tenga acceso a PushManager
+if (self.registration && self.registration.pushManager) {
+  console.log("✅ PushManager disponible en el Service Worker");
+} else {
+  console.warn("⚠️ PushManager NO disponible en el Service Worker");
+}
 
 // REGISTRAR EL LISTENER DE PUSH INMEDIATAMENTE - ANTES DE CUALQUIER OTRA COSA
 // Esto es crítico porque si el listener no está registrado cuando llega el evento push, se perderá
