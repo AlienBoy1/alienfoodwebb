@@ -18,6 +18,7 @@ const STORES = {
 class IndexedDBService {
   constructor() {
     this.db = null;
+    this.disabled = false; // si IndexedDB falla, evitamos reintentar para no romper UX
   }
 
   // Inicializar la base de datos
@@ -25,6 +26,10 @@ class IndexedDBService {
     // Verificar que estamos en el cliente
     if (typeof window === "undefined" || typeof indexedDB === "undefined") {
       throw new Error("IndexedDB solo está disponible en el cliente");
+    }
+
+    if (this.disabled) {
+      return null;
     }
 
     if (this.db) {
@@ -35,8 +40,12 @@ class IndexedDBService {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error("Error abriendo IndexedDB:", request.error);
-        reject(request.error);
+        this.disabled = true;
+        console.warn(
+          "IndexedDB deshabilitado en este navegador (quizá modo incógnito o sin almacenamiento). Se continua sin caché.",
+          request.error
+        );
+        resolve(null); // no rechazar para que el flujo continúe sin caché
       };
 
       request.onsuccess = () => {
@@ -104,7 +113,8 @@ class IndexedDBService {
 
   // Guardar platillos
   async saveDishes(dishes) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return dishes;
     const transaction = this.db.transaction([STORES.DISHES], "readwrite");
     const store = transaction.objectStore(STORES.DISHES);
 
@@ -116,7 +126,8 @@ class IndexedDBService {
 
   // Obtener platillos
   async getDishes() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.DISHES], "readonly");
     const store = transaction.objectStore(STORES.DISHES);
     return new Promise((resolve, reject) => {
@@ -128,7 +139,8 @@ class IndexedDBService {
 
   // Guardar pedidos
   async saveOrders(orders) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return orders;
     const transaction = this.db.transaction([STORES.ORDERS], "readwrite");
     const store = transaction.objectStore(STORES.ORDERS);
 
@@ -140,7 +152,8 @@ class IndexedDBService {
 
   // Obtener pedidos
   async getOrders() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.ORDERS], "readonly");
     const store = transaction.objectStore(STORES.ORDERS);
     return new Promise((resolve, reject) => {
@@ -152,7 +165,8 @@ class IndexedDBService {
 
   // Guardar categorías
   async saveCategories(categories) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return categories;
     const transaction = this.db.transaction([STORES.CATEGORIES], "readwrite");
     const store = transaction.objectStore(STORES.CATEGORIES);
 
@@ -164,7 +178,8 @@ class IndexedDBService {
 
   // Obtener categorías
   async getCategories() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.CATEGORIES], "readonly");
     const store = transaction.objectStore(STORES.CATEGORIES);
     return new Promise((resolve, reject) => {
@@ -176,7 +191,8 @@ class IndexedDBService {
 
   // Guardar usuarios
   async saveUsers(users) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return users;
     const transaction = this.db.transaction([STORES.USERS], "readwrite");
     const store = transaction.objectStore(STORES.USERS);
 
@@ -192,7 +208,8 @@ class IndexedDBService {
 
   // Obtener usuarios
   async getUsers() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.USERS], "readonly");
     const store = transaction.objectStore(STORES.USERS);
     return new Promise((resolve, reject) => {
@@ -204,7 +221,8 @@ class IndexedDBService {
 
   // Guardar carrito
   async saveCart(cartItems) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return cartItems;
     const transaction = this.db.transaction([STORES.CART], "readwrite");
     const store = transaction.objectStore(STORES.CART);
 
@@ -220,7 +238,8 @@ class IndexedDBService {
 
   // Obtener carrito
   async getCart() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.CART], "readonly");
     const store = transaction.objectStore(STORES.CART);
     return new Promise((resolve, reject) => {
@@ -232,7 +251,8 @@ class IndexedDBService {
 
   // Agregar acción a la cola de sincronización
   async addToSyncQueue(action) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return null;
     const transaction = this.db.transaction([STORES.SYNC_QUEUE], "readwrite");
     const store = transaction.objectStore(STORES.SYNC_QUEUE);
 
@@ -251,7 +271,8 @@ class IndexedDBService {
 
   // Obtener cola de sincronización
   async getSyncQueue() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.SYNC_QUEUE], "readonly");
     const store = transaction.objectStore(STORES.SYNC_QUEUE);
     return new Promise((resolve, reject) => {
@@ -263,7 +284,8 @@ class IndexedDBService {
 
   // Eliminar item de la cola de sincronización
   async removeFromSyncQueue(id) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return;
     const transaction = this.db.transaction([STORES.SYNC_QUEUE], "readwrite");
     const store = transaction.objectStore(STORES.SYNC_QUEUE);
     return new Promise((resolve, reject) => {
@@ -283,7 +305,8 @@ class IndexedDBService {
 
   // Guardar imagen de platillo
   async saveDishImage(imageData) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return null;
     const transaction = this.db.transaction([STORES.DISH_IMAGES], "readwrite");
     const store = transaction.objectStore(STORES.DISH_IMAGES);
 
@@ -314,7 +337,8 @@ class IndexedDBService {
 
   // Obtener imágenes por categoría
   async getDishImagesByCategory(category) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.DISH_IMAGES], "readonly");
     const store = transaction.objectStore(STORES.DISH_IMAGES);
     const index = store.index("category");
@@ -328,7 +352,8 @@ class IndexedDBService {
 
   // Obtener todas las imágenes
   async getAllDishImages() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return [];
     const transaction = this.db.transaction([STORES.DISH_IMAGES], "readonly");
     const store = transaction.objectStore(STORES.DISH_IMAGES);
     
@@ -341,7 +366,8 @@ class IndexedDBService {
 
   // Guardar configuración
   async saveSetting(key, value) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return null;
     const transaction = this.db.transaction([STORES.SETTINGS], "readwrite");
     const store = transaction.objectStore(STORES.SETTINGS);
     
@@ -354,7 +380,8 @@ class IndexedDBService {
 
   // Obtener configuración
   async getSetting(key) {
-    await this.init();
+    const db = await this.init();
+    if (!db) return null;
     const transaction = this.db.transaction([STORES.SETTINGS], "readonly");
     const store = transaction.objectStore(STORES.SETTINGS);
     
@@ -367,7 +394,8 @@ class IndexedDBService {
 
   // Obtener todas las configuraciones
   async getAllSettings() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return {};
     const transaction = this.db.transaction([STORES.SETTINGS], "readonly");
     const store = transaction.objectStore(STORES.SETTINGS);
     
@@ -386,7 +414,8 @@ class IndexedDBService {
 
   // Limpiar toda la base de datos (útil para desarrollo)
   async clearAll() {
-    await this.init();
+    const db = await this.init();
+    if (!db) return;
     const stores = Object.values(STORES);
     const transaction = this.db.transaction(stores, "readwrite");
 
