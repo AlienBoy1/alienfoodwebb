@@ -1,7 +1,10 @@
 // Service Worker personalizado con soporte para notificaciones push
+console.log("🚀 Service Worker personalizado (sw-custom.js) iniciando...");
+
 // Cargar workbox de forma segura
 try {
   importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.1.5/workbox-sw.js');
+  console.log("✅ Workbox cargado correctamente");
 } catch (error) {
   console.error('Error cargando Workbox, continuando sin él:', error);
 }
@@ -89,7 +92,11 @@ self.addEventListener('fetch', function(event) {
   // Para otras peticiones (API, assets, etc.), dejar que Workbox las maneje
 });
 
-// Manejo de notificaciones push
+// CRÍTICO: Registrar el listener de push INMEDIATAMENTE al cargar el script
+// Esto debe hacerse ANTES de cualquier otra cosa para asegurar que esté listo
+console.log("📋 Service Worker personalizado cargado - Registrando listener de push...");
+
+// Manejo de notificaciones push - REGISTRAR INMEDIATAMENTE
 self.addEventListener("push", async function (event) {
   console.log("🔔 ========== PUSH EVENT RECIBIDO ==========");
   console.log("Service Worker activo:", self.registration.active ? "Sí" : "No");

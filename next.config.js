@@ -14,6 +14,8 @@ module.exports = withPWA({
     fallbacks: {
       document: '/offline', // Usar rewrite a /offline.html
     },
+    // Importar el Service Worker personalizado después del generado
+    importScripts: ['/sw-custom.js'],
   },
   env: {
     stripe_public_key: process.env.STRIPE_PUBLIC_KEY,
@@ -68,6 +70,16 @@ module.exports = withPWA({
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        // Permitir acceso público a archivos estáticos del manifest
+        source: '/img/favicons/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
