@@ -12,7 +12,7 @@ module.exports = withPWA({
     skipWaiting: true,
     // Mejorar el manejo offline
     fallbacks: {
-      document: '/offline.html', // Fallback estático en public para evitar 404
+      document: '/offline', // Usar rewrite a /offline.html
     },
   },
   env: {
@@ -41,6 +41,15 @@ module.exports = withPWA({
       );
     }
     return config;
+  },
+  // Rewrites para que /offline funcione correctamente
+  async rewrites() {
+    return [
+      {
+        source: '/offline',
+        destination: '/offline.html',
+      },
+    ];
   },
   // Headers para mejorar compatibilidad
   async headers() {
