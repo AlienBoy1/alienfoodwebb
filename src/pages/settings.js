@@ -62,6 +62,15 @@ function Settings() {
     { id: "purple", name: "Morado Épico", color: "#8b5cf6", gradient: "from-purple-500 to-purple-600" },
     { id: "orange", name: "Naranja Retro", color: "#f97316", gradient: "from-orange-500 to-red-500" },
     { id: "pink", name: "Rosa Vibrante", color: "#ec4899", gradient: "from-pink-500 to-rose-500" },
+    { id: "red", name: "Rojo Intenso", color: "#ef4444", gradient: "from-red-500 to-red-600" },
+    { id: "teal", name: "Verde Azulado", color: "#14b8a6", gradient: "from-teal-500 to-teal-600" },
+    { id: "cyan", name: "Cian Brillante", color: "#06b6d4", gradient: "from-cyan-500 to-cyan-600" },
+    { id: "amber", name: "Ámbar Dorado", color: "#f59e0b", gradient: "from-amber-500 to-amber-600" },
+    { id: "emerald", name: "Esmeralda", color: "#10b981", gradient: "from-emerald-500 to-emerald-600" },
+    { id: "indigo", name: "Índigo Profundo", color: "#6366f1", gradient: "from-indigo-500 to-indigo-600" },
+    { id: "violet", name: "Violeta", color: "#8b5cf6", gradient: "from-violet-500 to-violet-600" },
+    { id: "rose", name: "Rosa Suave", color: "#f43f5e", gradient: "from-rose-500 to-rose-600" },
+    { id: "sky", name: "Cielo Azul", color: "#0ea5e9", gradient: "from-sky-500 to-sky-600" },
   ];
 
   const fontSizes = [

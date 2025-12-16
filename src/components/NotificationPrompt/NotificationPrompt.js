@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/client";
 import { BellIcon } from "@heroicons/react/outline";
 import { ExclamationCircleIcon } from "@heroicons/react/solid";
-import { requestNotificationPermission, subscribeToPushNotifications, unsubscribeFromPushNotifications } from "../../util/pushNotifications";
+import { requestNotificationPermission, subscribeToPushNotifications, unsubscribeFromPushNotifications, checkAndRenewSubscriptions } from "../../util/pushNotifications";
 import NormalToast from "../../util/Toast/NormalToast";
 
 function NotificationPrompt() {
@@ -15,6 +15,12 @@ function NotificationPrompt() {
     // Verificar si ya está suscrito
     if ("serviceWorker" in navigator && session) {
       checkSubscription();
+      // Verificar y renovar suscripciones expiradas cada 5 minutos
+      const renewInterval = setInterval(() => {
+        checkAndRenewSubscriptions().catch(console.error);
+      }, 5 * 60 * 1000); // 5 minutos
+      
+      return () => clearInterval(renewInterval);
     }
   }, [session]);
 

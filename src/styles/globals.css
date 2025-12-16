@@ -196,9 +196,55 @@
   transition-duration: 150ms;
 }
 
-/* Dark mode styles */
+/* Dark mode styles mejorados */
+.dark {
+  color-scheme: dark;
+}
+
 .dark .dropDownOption {
   @apply hover:bg-gray-700;
+}
+
+.dark body {
+  background-color: var(--bg-primary, #111827);
+  color: var(--text-primary, #f9fafb);
+}
+
+.dark .bg-white {
+  background-color: var(--bg-secondary, #1f2937) !important;
+}
+
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  color: var(--text-primary, #f9fafb) !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: var(--text-secondary, #e5e7eb) !important;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: var(--border-color, #374151) !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: var(--bg-tertiary, #374151) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--bg-secondary, #1f2937) !important;
+  color: var(--text-primary, #f9fafb) !important;
+  border-color: var(--border-color, #374151) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--text-muted, #9ca3af) !important;
 }
 
 /* No animations class */

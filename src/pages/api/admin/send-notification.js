@@ -1,29 +1,13 @@
 import { connectToDatabase } from "../../../util/mongodb";
-import webpush from "web-push";
-import { getVapidKeys, configureWebPush } from "../../../util/vapid";
 import { withAdmin } from "../../../middleware/auth";
 import { validateNotificationData } from "../../../util/security";
 import { checkRateLimit } from "../../../util/rateLimiter";
 import { setSecurityHeaders } from "../../../util/security";
+import { configureWebPush } from "../../../util/vapid";
+import webpush from "web-push";
 
-// Asegurarnos de que web-push está configurado con las VAPID keys (desde env o generadas en memoria)
-// IMPORTANTE: configureWebPush debe llamarse antes de cada envío para asegurar que las keys estén configuradas
-let vapidKeys = null;
-
-function ensureWebPushConfigured() {
-  configureWebPush();
-  vapidKeys = getVapidKeys();
-  
-  if (!vapidKeys || !vapidKeys.publicKey || !vapidKeys.privateKey) {
-    console.error("No VAPID keys disponibles. Por favor, configura VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY en .env.local o deja que el servidor genere claves en memoria.");
-    return false;
-  }
-  
-  return true;
-}
-
-// Configurar al cargar el módulo
-ensureWebPushConfigured();
+// Configurar web-push al cargar el módulo
+configureWebPush();
 
 async function handler(req, res) {
     // Aplicar rate limiting
@@ -86,99 +70,50 @@ async function handler(req, res) {
 
     // Generar un tag único para cada notificación
     const uniqueTag = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Crear el payload de notificación
-    // IMPORTANTE: web-push requiere que el payload sea un string JSON
-    const notificationPayload = JSON.stringify({
+
+    // Crear el payload de la notificación
+    const notificationData = {
       title: title,
       body: message,
-      message: message, // Algunos navegadores usan 'message' en lugar de 'body'
+      message: message,
       icon: "/img/favicons/android-chrome-192x192.png",
       badge: "/img/favicons/android-chrome-192x192.png",
       data: {
         url: "/",
         tag: uniqueTag,
       },
-      tag: uniqueTag, // Tag único para cada notificación
+      tag: uniqueTag,
       timestamp: Date.now(),
-    });
-    
-    console.log("📦 Payload de notificación creado:", notificationPayload);
-    console.log("📤 Enviando notificaciones push a", subscriptions.length, "suscripciones");
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+    };
 
-    // Si no hay suscripciones encontradas para el usuario objetivo,
-    // guardamos la notificación en pendingNotifications para entregarla
-    // cuando el usuario se vuelva a suscribir.
-    if (subscriptions.length === 0) {
-      // Si se especificó un userId, guardarla para ese usuario
-      if (userId && userId !== "all") {
-        await db.collection("pendingNotifications").insertOne({
-          userId,
-          payload: JSON.parse(notificationPayload),
-          createdAt: new Date(),
-        });
+    console.log("📦 Payload de notificación creado:", JSON.stringify(notificationData));
 
-        return res.status(200).json({ message: "Usuario offline: notificación guardada para entrega posterior", sent: 0, failed: 1, total: 0 });
-      }
+    console.log(`📤 Enviando notificaciones push a ${subscriptions.length} suscripciones`);
 
-      return res.status(404).json({ message: "No hay suscripciones encontradas" });
-    }
-
-    const notificationData = JSON.parse(notificationPayload);
     
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          // Verificar que la suscripción tenga la estructura correcta
-          if (!sub.subscription || !sub.subscription.endpoint) {
-            console.error(`Suscripción inválida para ${sub.userId}:`, sub);
-            return { success: false, userId: sub.userId, error: "Suscripción inválida" };
+          console.log(`📤 Enviando notificación push a ${sub.userId}`);
+          console.log(`Endpoint: ${sub.subscription.endpoint.substring(0, 50)}...`);
+          console.log(`Payload: ${JSON.stringify(notificationData)}`);
+          
+          // Verificar que las claves de suscripción estén presentes
+          if (!sub.subscription.keys || !sub.subscription.keys.p256dh || !sub.subscription.keys.auth) {
+            console.warn(`Suscripción sin claves para ${sub.userId}, eliminándola`);
+            await db.collection("pushSubscriptions").deleteOne({ _id: sub._id });
+            return { success: false, userId: sub.userId, error: "Suscripción sin claves" };
           }
 
-          console.log(`📤 Enviando notificación push a ${sub.userId}`);
-          console.log(`Endpoint: ${sub.subscription.endpoint.substring(0, 80)}...`);
-          console.log(`Payload:`, notificationPayload);
-          
-          // Asegurarse de que webpush esté configurado antes de enviar
-          if (!ensureWebPushConfigured()) {
-            throw new Error("VAPID keys no configuradas correctamente");
-          }
-          
-          // Verificar que la suscripción tenga todas las claves necesarias
-          if (!sub.subscription.keys || !sub.subscription.keys.p256dh || !sub.subscription.keys.auth) {
-            console.error(`Suscripción sin claves para ${sub.userId}:`, sub.subscription);
-            throw new Error("Suscripción incompleta: faltan claves de cifrado");
-          }
-          
+          console.log("✅ Web-push configurado con VAPID keys");
           console.log(`Claves de suscripción presentes: p256dh=${!!sub.subscription.keys.p256dh}, auth=${!!sub.subscription.keys.auth}`);
+
+          // Intentar enviar la notificación
+          await webpush.sendNotification(sub.subscription, JSON.stringify(notificationData));
           
-          try {
-            const result = await webpush.sendNotification(
-              sub.subscription,
-              notificationPayload,
-              {
-                // Opciones adicionales para webpush
-                TTL: 86400, // 24 horas
-                urgency: 'normal',
-              }
-            );
-            
-            console.log(`✅ Notificación push enviada exitosamente a ${sub.userId}`);
-            console.log(`Status code: ${result.statusCode || 'N/A'}`);
-            console.log(`Headers:`, result.headers || {});
-            
-            // Verificar que la respuesta sea exitosa
-            if (result.statusCode && result.statusCode >= 200 && result.statusCode < 300) {
-              console.log(`✅ Notificación push aceptada por el servicio push (${result.statusCode})`);
-            } else {
-              console.warn(`⚠️ Respuesta inesperada del servicio push: ${result.statusCode}`);
-            }
-          } catch (pushError) {
-            console.error(`❌ Error en webpush.sendNotification:`, pushError);
-            throw pushError;
-          }
-          
-          // Guardar la notificación en la base de datos para el usuario
+          // Si se envió correctamente, también guardarla en la colección de notificaciones
           try {
             await db.collection("notifications").insertOne({
               userId: sub.userId,
@@ -190,7 +125,6 @@ async function handler(req, res) {
               read: false,
               createdAt: new Date(),
             });
-            console.log(`Notificación guardada en BD para ${sub.userId}`);
           } catch (saveError) {
             console.error(`Error guardando notificación en BD para ${sub.userId}:`, saveError);
             // No fallar el envío si falla el guardado
@@ -209,7 +143,10 @@ async function handler(req, res) {
           if (error.statusCode === 410 || error.statusCode === 404) {
             console.log(`Eliminando suscripción inválida para ${sub.userId}`);
             await db.collection("pushSubscriptions").deleteOne({ _id: sub._id });
-            return { success: false, userId: sub.userId, error: "Suscripción inválida o expirada" };
+            
+            // Intentar renovar la suscripción automáticamente si es posible
+            // Esto se hará cuando el usuario vuelva a la app y se suscriba de nuevo
+            return { success: false, userId: sub.userId, error: "Suscripción inválida o expirada - será renovada automáticamente" };
           } else {
             // Si falla por estar offline u otro problema temporal, guardar la notificación pendiente
             console.log(`Guardando notificación pendiente para ${sub.userId}`);
@@ -244,16 +181,15 @@ async function handler(req, res) {
         const failed = results.length - successful;
 
         return res.status(200).json({
-            message: "Notificaciones enviadas",
+            message: `Notificaciones enviadas: ${successful} exitosas, ${failed} fallidas`,
             sent: successful,
             failed: failed,
-            total: subscriptions.length,
+            results: results.map((r) => r.status === "fulfilled" ? r.value : { success: false, error: r.reason }),
         });
     } catch (error) {
-        console.error("Error enviando notificaciones:", error);
+        console.error("Error en API de notificaciones:", error);
         return res.status(500).json({ message: "Error interno del servidor" });
     }
 }
 
 export default withAdmin(handler);
-

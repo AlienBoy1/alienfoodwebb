@@ -187,19 +187,44 @@ function AddDish(props) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Seleccionar Imagen del Producto
               </label>
-              {/* Input para subir archivo */}
+              {/* Input para subir archivo con permisos */}
               <div className="mb-3">
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  capture="environment"
+                  onChange={async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setImage(reader.result);
-                      };
-                      reader.readAsDataURL(file);
+                      // Verificar tamaño del archivo (máximo 5MB)
+                      if (file.size > 5 * 1024 * 1024) {
+                        NormalToast("La imagen es demasiado grande. Máximo 5MB", true);
+                        e.target.value = "";
+                        return;
+                      }
+
+                      // Verificar tipo de archivo
+                      if (!file.type.startsWith('image/')) {
+                        NormalToast("Por favor selecciona un archivo de imagen", true);
+                        e.target.value = "";
+                        return;
+                      }
+
+                      try {
+                        // Leer el archivo como base64
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setImage(reader.result);
+                          NormalToast("Imagen cargada correctamente");
+                        };
+                        reader.onerror = () => {
+                          NormalToast("Error al leer la imagen", true);
+                        };
+                        reader.readAsDataURL(file);
+                      } catch (error) {
+                        console.error("Error procesando imagen:", error);
+                        NormalToast("Error al procesar la imagen", true);
+                      }
                     }
                   }}
                   className="block w-full text-sm text-gray-500 dark:text-gray-400
@@ -211,6 +236,9 @@ function AddDish(props) {
                     cursor-pointer"
                   disabled={disabled}
                 />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Puedes subir una imagen desde tu dispositivo (máximo 5MB)
+                </p>
               </div>
               {loadingImages ? (
                 <div className="text-center py-4 text-gray-500">

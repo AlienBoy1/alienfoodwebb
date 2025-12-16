@@ -20,6 +20,8 @@ function Profile() {
     image: "",
   });
   const [formLoading, setFormLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingUpdateData, setPendingUpdateData] = useState(null);
   const [profileImages] = useState(getAllProfileImages());
 
   useEffect(() => {
@@ -41,27 +43,50 @@ function Profile() {
     });
   };
 
-  const handleSave = async () => {
-    setFormLoading(true);
-    try {
-      const updateData = {
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        image: formData.image,
-      };
+  const handleSave = () => {
+    // Preparar datos para confirmación
+    const updateData = {
+      name: formData.name,
+      username: formData.username,
+      email: formData.email,
+      image: formData.image,
+    };
 
-      // Solo incluir password si se proporcionó uno nuevo
-      if (formData.password && formData.password.length > 0) {
-        if (formData.password.length < 6) {
-          NormalToast("La contraseña debe tener al menos 6 caracteres", true);
-          setFormLoading(false);
-          return;
-        }
-        updateData.password = formData.password;
+    // Solo incluir password si se proporcionó uno nuevo
+    if (formData.password && formData.password.length > 0) {
+      if (formData.password.length < 6) {
+        NormalToast("La contraseña debe tener al menos 6 caracteres", true);
+        return;
       }
+      updateData.password = formData.password;
+    }
 
-      const response = await axios.put("/api/profile/update", updateData);
+    // Verificar si hay cambios
+    const hasChanges = 
+      formData.name !== (session?.user?.name || "") ||
+      formData.username !== (session?.user?.username || "") ||
+      formData.email !== (session?.user?.email || "") ||
+      formData.image !== (session?.user?.image || "") ||
+      (formData.password && formData.password.length > 0);
+
+    if (!hasChanges) {
+      NormalToast("No hay cambios para guardar", true);
+      return;
+    }
+
+    // Mostrar diálogo de confirmación
+    setPendingUpdateData(updateData);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmSave = async () => {
+    if (!pendingUpdateData) return;
+    
+    setFormLoading(true);
+    setShowConfirmDialog(false);
+    
+    try {
+      const response = await axios.put("/api/profile/update", pendingUpdateData);
 
       if (response.status === 200) {
         NormalToast("Perfil actualizado exitosamente");
@@ -79,6 +104,7 @@ function Profile() {
       );
     } finally {
       setFormLoading(false);
+      setPendingUpdateData(null);
     }
   };
 
@@ -119,7 +145,7 @@ function Profile() {
   return (
     <>
       <Head>
-        <title>Alien Food | Perfil</title>
+        <title>TUNEL DEL TIEMPO | Perfil</title>
       </Head>
       <div className="heightFix px-3 sm:px-6">
         <div className="max-w-screen-xl mx-auto md:py-20 py-8 sm:py-12 space-y-6 sm:space-y-10 pb-16 sm:pb-20">
@@ -292,6 +318,40 @@ function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Diálogo de confirmación */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+              Confirmar Cambios
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              ¿Estás seguro de que deseas actualizar tu información de perfil? 
+              Los cambios serán guardados permanentemente.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmSave}
+                disabled={formLoading}
+                className="flex-1 button py-2 px-4 disabled:opacity-50"
+              >
+                {formLoading ? "Guardando..." : "Confirmar"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmDialog(false);
+                  setPendingUpdateData(null);
+                }}
+                disabled={formLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -136,13 +136,66 @@ function UpdateDish(props) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  URL de Imagen *
+                  Imagen del Producto *
                 </label>
+                {/* Input para subir archivo */}
+                <div className="mb-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        // Verificar tamaño del archivo (máximo 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                          NormalToast("La imagen es demasiado grande. Máximo 5MB", true);
+                          e.target.value = "";
+                          return;
+                        }
+
+                        // Verificar tipo de archivo
+                        if (!file.type.startsWith('image/')) {
+                          NormalToast("Por favor selecciona un archivo de imagen", true);
+                          e.target.value = "";
+                          return;
+                        }
+
+                        try {
+                          // Leer el archivo como base64
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setImage(reader.result);
+                            NormalToast("Imagen cargada correctamente");
+                          };
+                          reader.onerror = () => {
+                            NormalToast("Error al leer la imagen", true);
+                          };
+                          reader.readAsDataURL(file);
+                        } catch (error) {
+                          console.error("Error procesando imagen:", error);
+                          NormalToast("Error al procesar la imagen", true);
+                        }
+                      }
+                    }}
+                    className="block w-full text-sm text-gray-500 dark:text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-primary-light file:text-white
+                      hover:file:bg-primary-dark
+                      cursor-pointer"
+                    disabled={disabled}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Puedes subir una imagen desde tu dispositivo (máximo 5MB)
+                  </p>
+                </div>
+                {/* Campo de texto como alternativa */}
                 <input
                   type="url"
-                  required
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  className="bg-gray-100 dark:bg-gray-700 py-2 px-4 border border-gray-200 dark:border-gray-600 rounded-md outline-none w-full text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-light"
+                  placeholder="O ingresa una URL de imagen (https://ejemplo.com/imagen.jpg)"
+                  className="bg-gray-100 dark:bg-gray-700 py-2 px-4 border border-gray-200 dark:border-gray-600 rounded-md outline-none w-full text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-primary-light mt-2"
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   disabled={disabled}
