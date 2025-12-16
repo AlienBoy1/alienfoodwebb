@@ -21,6 +21,7 @@ import NormalToast from "../util/Toast/NormalToast";
 import OfflineBanner from "../components/OfflineBanner/OfflineBanner";
 import OfflineLinkHandler from "../components/OfflineLink/OfflineLink";
 import { ThemeProvider } from "../contexts/ThemeContext";
+import { checkAndClearOldCache } from "../util/clearCache";
 
 //Binding events.
 Router.events.on("routeChangeStart", () => NProgress.start());
@@ -87,6 +88,14 @@ function MyApp({ Component, pageProps }) {
           clearTimeout(id);
         };
       }
+    }
+  }, []);
+
+  // Verificar y limpiar caché antiguo al cargar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Verificar si hay caché antiguo y limpiarlo
+      checkAndClearOldCache().catch(console.error);
     }
   }, []);
 

@@ -10,6 +10,9 @@ module.exports = withPWA({
     runtimeCaching,
     register: true,
     skipWaiting: true,
+    buildExcludes: [/middleware-manifest\.json$/],
+    // Forzar actualización del service worker cambiando el nombre
+    sw: 'sw.js',
     // Mejorar el manejo offline
     fallbacks: {
       document: '/offline', // Usar rewrite a /offline.html

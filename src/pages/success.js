@@ -16,7 +16,7 @@ function Success() {
   return (
     <>
       <Head>
-        <title>Alien Food | Pedido Realizado Exitosamente</title>
+        <title>TUNEL DEL TIEMPO | Pedido Realizado Exitosamente</title>
       </Head>
       <div className="bg-gray-100 heightFix flex items-center sm:px-6">
         <main className="max-w-screen-lg mx-auto">

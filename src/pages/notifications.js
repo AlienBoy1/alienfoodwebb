@@ -154,7 +154,7 @@ function NotificationsPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1">
                             <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {notification.title || "Alien Food"}
+                              {notification.title || "TUNEL DEL TIEMPO"}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-300 mt-1">
                               {notification.body || notification.message}

@@ -46,7 +46,7 @@ export function configureWebPush() {
   const keys = getVapidKeys();
   try {
     // Usar un email de contacto válido
-    webpush.setVapidDetails("mailto:admin@alienfood.com", keys.publicKey, keys.privateKey);
+    webpush.setVapidDetails("mailto:admin@tuneldeltiempo.com", keys.publicKey, keys.privateKey);
     console.debug("✅ Web-push configurado con VAPID keys");
   } catch (e) {
     console.error("❌ Error configurando web-push VAPID details:", e);

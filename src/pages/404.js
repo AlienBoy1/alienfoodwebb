@@ -6,7 +6,7 @@ export default function Custom404() {
   return (
     <>
       <Head>
-        <title>Alien Food | Página No Encontrada</title>
+        <title>TUNEL DEL TIEMPO | Página No Encontrada</title>
       </Head>
 
       <div className="heightFix flex items-center justify-center text-center ">

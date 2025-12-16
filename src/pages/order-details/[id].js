@@ -8,7 +8,7 @@ function orderDetails() {
   return (
     <>
       <Head>
-        <title>Alien Food | Detalles del Pedido</title>
+        <title>TUNEL DEL TIEMPO | Detalles del Pedido</title>
       </Head>
       <div className="heightFix px-6 py-10">
         <div className="max-w-screen-xl mx-auto">

@@ -24,7 +24,7 @@ function Orders() {
   return (
     <>
       <Head>
-        <title>Alien Food | Pedidos</title>
+        <title>TUNEL DEL TIEMPO | Pedidos</title>
       </Head>
       <div className="heightFix px-3 sm:px-6">
         <main className="max-w-screen-xl mx-auto md:py-20 py-8 sm:py-12 pb-16 sm:pb-20">

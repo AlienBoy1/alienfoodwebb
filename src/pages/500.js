@@ -6,7 +6,7 @@ export default function Custom500() {
   return (
     <>
       <Head>
-        <title>Alien Food | Error del Servidor</title>
+        <title>TUNEL DEL TIEMPO | Error del Servidor</title>
       </Head>
       <div className="heightFix flex items-center justify-center text-center">
         <div className="max-w-screen-xl mx-auto flex-col items-center justify-center">

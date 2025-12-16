@@ -1,7 +1,7 @@
 // Servicio para manejar IndexedDB para almacenamiento offline
 
-const DB_NAME = "AlienFoodDB";
-const DB_VERSION = 3;
+const DB_NAME = "TunelDelTiempoDB";
+const DB_VERSION = 4; // Incrementar versión para forzar migración
 
 // Stores (tablas) en IndexedDB
 const STORES = {

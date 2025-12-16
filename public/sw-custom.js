@@ -98,7 +98,7 @@ self.addEventListener("push", async function (event) {
   const body = data.body || data.message || "Tienes una nueva notificación";
   
   // Generar un tag único para cada notificación para que no se reemplacen
-  const uniqueTag = data.tag || `alien-food-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const uniqueTag = data.tag || `tunel-tiempo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   
   console.log(`📢 Preparando notificación: "${title}" - "${body}"`);
   console.log(`Tag único: ${uniqueTag}`);

@@ -177,7 +177,7 @@ function Users() {
   return (
     <>
       <Head>
-        <title>Alien Food | Usuarios</title>
+        <title>TUNEL DEL TIEMPO | Usuarios</title>
       </Head>
       <div className="heightFixAdmin bg-gray-100 dark:bg-gray-900 py-6 sm:py-10 px-3 sm:px-6">
         <div className="max-w-screen-xl mx-auto bg-white shadow rounded-md my-6">

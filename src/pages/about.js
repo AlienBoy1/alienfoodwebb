@@ -48,7 +48,7 @@ function About() {
                     </span>
                     por
                     <span className="font-semibold text-primary-light underline mx-1">
-                      <Link href="https://aalienfoodwebb.vercel.app/">
+                      <Link href="https://tuneldeltiempo.vercel.app/">
                         Francisco Sanchez
                       </Link>
                     </span>

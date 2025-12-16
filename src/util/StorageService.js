@@ -1,4 +1,4 @@
-const LOCALSTORAGE_KEY_PREFIX = "AlienFood";
+const LOCALSTORAGE_KEY_PREFIX = "TunelDelTiempo";
 
 export default {
     get(item) {

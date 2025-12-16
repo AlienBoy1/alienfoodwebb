@@ -28,7 +28,7 @@ function AddCategory() {
   return (
     <>
       <Head>
-        <title>Alien Food | Agregar Categoría</title>
+        <title>TUNEL DEL TIEMPO | Agregar Categoría</title>
       </Head>
       <div className="heightFixAdmin px-6 lg:py-28 py-24">
         <div className="mx-auto max-w-screen-sm sm:text-base  text-sm">
